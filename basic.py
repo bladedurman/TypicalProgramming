@@ -276,7 +276,7 @@ class Parser:
             else:
                 return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected ')'"))
 
-        return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected int or float"))
+        return res.failure(InvalidSyntaxError(self.tokens[self.tok_idx - 1].pos_start, self.tokens[self.tok_idx - 1].pos_end, "Expected int or float"))
 
     def term(self):
         return self.bin_op(self.factor, (TT_MUL, TT_DIV))
