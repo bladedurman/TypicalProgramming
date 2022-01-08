@@ -53,7 +53,7 @@ class RTError(Error):
             string_with_arrows(self.pos_start.ftxt,
                                self.pos_start, self.pos_end)
         return result
-    
+
     def generate_traceback(self):
         result = ''
         pos = self.pos_start
@@ -65,7 +65,6 @@ class RTError(Error):
             ctx = ctx.parent
 
         return 'Traceback (most recent call last):\n' + result
-
 
 
 #####################################################
@@ -293,7 +292,7 @@ class Parser:
         res = ParserResult()
         tok = self.current_tok
 
-        if tok.type in (TT_PLUS, TT_MINUS):
+        if tok.type in (TT_PLUS, TT_MINUS, TT_MUL, TT_DIV):
             res.register(self.advance())
             factor = res.register(self.factor())
             if res.error:
@@ -304,18 +303,20 @@ class Parser:
             res.register(self.advance())
             return res.success(NumberNode(tok))
 
-        elif tok.type == TT_LPAREN:
+        elif tok.type == TT_LPAREN or tok.type == TT_RPAREN:
             res.register(self.advance())
             expr = res.register(self.expr())
             if res.error:
-                return res
+                return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected '('"))
             if self.current_tok.type == TT_RPAREN:
                 res.register(self.advance())
+                if res.error:
+                    return res
                 return res.success(expr)
             else:
                 return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected ')'"))
-
-        return res.failure(InvalidSyntaxError(self.tokens[self.tok_idx - 1].pos_start, self.tokens[self.tok_idx - 1].pos_end, "Expected int or float"))
+        else:
+            return res.failure(InvalidSyntaxError(self.tokens[self.tok_idx - 1].pos_start, self.tokens[self.tok_idx - 1].pos_end, "Expected int or float"))
 
     def term(self):
         return self.bin_op(self.factor, (TT_MUL, TT_DIV))
