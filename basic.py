@@ -486,7 +486,7 @@ class Parser:
 
     def term(self):
         return self.bin_op(self.factor, (TT_MUL, TT_DIV, TT_MOD))
-    
+
     def arith_expr(self):
         return self.bin_op(self.term, (TT_PLUS, TT_MINUS))
 
@@ -501,12 +501,18 @@ class Parser:
             node = res.register(self.comp_expr())
             if res.error: return res
             return res.success(UnaryOpNode(op_tok, node))
-        
-        node = res.register(self.bin_op(self.arith_expr, (TT_EE, TT_NE, TT_LT, TT_GT, TT_LTE, TT_GTE)))
+
+        node = res.register(
+            self.bin_op(self.arith_expr,
+                        (TT_EE, TT_NE, TT_LT, TT_GT, TT_LTE, TT_GTE)))
 
         if res.error:
-            return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected int, float, indentifier, '+', '-', '(', or 'not'"))
-        
+            return res.failure(
+                InvalidSyntaxError(
+                    self.current_tok.pos_start, self.current_tok.pos_end,
+                    "Expected int, float, indentifier, '+', '-', '(', or 'not'"
+                ))
+
         return res.success(node)
 
     def expr(self):
@@ -547,7 +553,8 @@ class Parser:
             return res.failure(
                 InvalidSyntaxError(
                     self.current_tok.pos_start, self.current_tok.pos_end,
-                    "Expected 'VAR', int, float, identifier, '+', '-', '(', or 'not'"))
+                    "Expected 'VAR', int, float, identifier, '+', '-', '(', or 'not'"
+                ))
 
         return res.success(node)
 
@@ -640,7 +647,7 @@ class Number:
         if isinstance(other, Number):
             if other.value == 0:
                 return None, RTError(other.pos_start, other.pos_end,
-                                        'Division by zero', self.context)
+                                     'Division by zero', self.context)
 
             return Number(self.value / other.value).set_context(
                 self.context), None
@@ -654,45 +661,54 @@ class Number:
         if isinstance(other, Number):
             if other.value == 0:
                 return None, RTError(other.pos_start, other.pos_end,
-                                        'Division by zero', self.context)
+                                     'Division by zero', self.context)
 
             return Number(self.value % other.value).set_context(
                 self.context), None
 
     def get_comparison_eq(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value == other.value)).set_context(self.context), None
+            return Number(int(self.value == other.value)).set_context(
+                self.context), None
 
     def get_comparison_ne(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value != other.value)).set_context(self.context), None
+            return Number(int(self.value != other.value)).set_context(
+                self.context), None
 
     def get_comparison_lt(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value < other.value)).set_context(self.context), None
+            return Number(int(self.value < other.value)).set_context(
+                self.context), None
 
     def get_comparison_gt(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value > other.value)).set_context(self.context), None
+            return Number(int(self.value > other.value)).set_context(
+                self.context), None
 
     def get_comparison_lte(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value <= other.value)).set_context(self.context), None
+            return Number(int(self.value <= other.value)).set_context(
+                self.context), None
 
     def get_comparison_gte(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value >= other.value)).set_context(self.context), None
+            return Number(int(self.value >= other.value)).set_context(
+                self.context), None
 
     def anded_by(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value and other.value)).set_context(self.context), None
+            return Number(int(self.value
+                              and other.value)).set_context(self.context), None
 
     def ored_by(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value or other.value)).set_context(self.context), None
+            return Number(int(self.value
+                              or other.value)).set_context(self.context), None
 
     def notted(self):
-        return Number(1 if self.value == 0 else 0).set_context(self.context), None
+        return Number(1 if self.value == 0 else 0).set_context(
+            self.context), None
 
     def copy(self):
         copy = Number(self.value)
@@ -855,7 +871,7 @@ class Interpreter:
 
 global_symbol_table = SymbolTable()
 global_symbol_table.set("null", Number(0))
-global_symbol_table.set("true", Number(0))
+global_symbol_table.set("true", Number(1))
 global_symbol_table.set("false", Number(0))
 
 
@@ -863,6 +879,7 @@ def run(fn, text):
     if "quit" in text.lower() or "exit" in text.lower():
         print("Bye-bye! Don't die")
         return None, None
+
     # Generate tokens
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
