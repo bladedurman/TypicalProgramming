@@ -1,10 +1,6 @@
 #######################################
 # IMPORTS
 #######################################
-
-from multiprocessing import Condition
-from tkinter import ttk
-from tracemalloc import start
 from string_with_arrows import string_with_arrows
 
 import string
