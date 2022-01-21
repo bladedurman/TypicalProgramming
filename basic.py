@@ -2016,52 +2016,49 @@ class Interpreter:
         return res.success(return_value)
 
 
-"""
-Run
-"""
+class Typical:
+    def __init__(self):
+        self.global_symbol_table = SymbolTable()
+        self.global_symbol_table.set("null", Number.null)
+        self.global_symbol_table.set("true", Number.true)
+        self.global_symbol_table.set("false", Number.false)
+        self.global_symbol_table.set("PI", Number.math_PI)
+        self.global_symbol_table.set("E", Number.e)
+        self.global_symbol_table.set("print", BuiltInFunction.print)
+        self.global_symbol_table.set("printRet", BuiltInFunction.print_ret)
+        self.global_symbol_table.set("input", BuiltInFunction.input)
+        self.global_symbol_table.set("inputInt", BuiltInFunction.input_int)
+        self.global_symbol_table.set("clear", BuiltInFunction.clear)
+        self.global_symbol_table.set("cls", BuiltInFunction.clear)
+        self.global_symbol_table.set("isNum", BuiltInFunction.is_number)
+        self.global_symbol_table.set("isStr", BuiltInFunction.is_string)
+        self.global_symbol_table.set("isList", BuiltInFunction.is_list)
+        self.global_symbol_table.set("isFun", BuiltInFunction.is_function)
+        self.global_symbol_table.set("append", BuiltInFunction.append)
+        self.global_symbol_table.set("remove", BuiltInFunction.pop)
+        self.global_symbol_table.set("extend", BuiltInFunction.extend)
 
-global_symbol_table = SymbolTable()
-global_symbol_table.set("null", Number.null)
-global_symbol_table.set("true", Number.true)
-global_symbol_table.set("false", Number.false)
-global_symbol_table.set("PI", Number.math_PI)
-global_symbol_table.set("E", Number.e)
-global_symbol_table.set("print", BuiltInFunction.print)
-global_symbol_table.set("printRet", BuiltInFunction.print_ret)
-global_symbol_table.set("input", BuiltInFunction.input)
-global_symbol_table.set("inputInt", BuiltInFunction.input_int)
-global_symbol_table.set("clear", BuiltInFunction.clear)
-global_symbol_table.set("cls", BuiltInFunction.clear)
-global_symbol_table.set("isNum", BuiltInFunction.is_number)
-global_symbol_table.set("isStr", BuiltInFunction.is_string)
-global_symbol_table.set("isList", BuiltInFunction.is_list)
-global_symbol_table.set("isFun", BuiltInFunction.is_function)
-global_symbol_table.set("append", BuiltInFunction.append)
-global_symbol_table.set("remove", BuiltInFunction.pop)
-global_symbol_table.set("extend", BuiltInFunction.extend)
+    def run(self, fn, text):
+        if "quit" in text.lower() or "exit" in text.lower():
+            print("Bye-bye! Don't die")
+            return None, None
 
+        # Generate tokens
+        lexer = Lexer(fn, text)
+        tokens, error = lexer.make_tokens()
+        if error:
+            return None, error
 
-def run(fn, text):
-    if "quit" in text.lower() or "exit" in text.lower():
-        print("Bye-bye! Don't die")
-        return None, None
+        # Generate AST
+        parser = Parser(tokens)
+        ast = parser.parse()
+        if ast.error:
+            return None, ast.error
 
-    # Generate tokens
-    lexer = Lexer(fn, text)
-    tokens, error = lexer.make_tokens()
-    if error:
-        return None, error
+        # Run program
+        interpreter = Interpreter()
+        context = Context('<program>')
+        context.symbol_table = self.global_symbol_table
+        result = interpreter.visit(ast.node, context)
 
-    # Generate AST
-    parser = Parser(tokens)
-    ast = parser.parse()
-    if ast.error:
-        return None, ast.error
-
-    # Run program
-    interpreter = Interpreter()
-    context = Context('<program>')
-    context.symbol_table = global_symbol_table
-    result = interpreter.visit(ast.node, context)
-
-    return result.value, result.error
+        return result.value, result.error
